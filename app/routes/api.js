@@ -1,5 +1,5 @@
 var express = require('express');
-var { Sequelize, sequelize, models } = require('../models')
+var { Sequelize, sequelize, Key, Translation } = require('../models')
 
 var router = express.Router();
 
@@ -50,8 +50,7 @@ router.get('/keys', (req, res) => {
   var filter = (name === undefined) ? {} : { name: name };
   console.log(name);
 
-  models.Key
-    .findAll({ where: filter })
+  Key.findAll({ where: filter })
     .then((keys) => {
       console.log(keys);
       res.json({ success: true, data: { keys: keys } });
@@ -76,8 +75,7 @@ router.post('/keys', (req, res) => {
 
   // In SQLite3, findOrCreate uses two queries (select => insert)
   // Using select and insert separately is better since allocateKeyId is called less frequently.
-  models.Key
-    .findOne({ where: { name: name } })
+  Key.findOne({ where: { name: name } })
     .then((key) => {
       if (key != null)
         throw new ResultWrapper(400, "Duplicated key name");
@@ -85,11 +83,7 @@ router.post('/keys', (req, res) => {
       return allocateKeyId();
     })
     .then((allocated_id) => {
-      return models.Key
-        .create({
-          id: allocated_id,
-          name: name
-        });
+      return Key.create({ id: allocated_id, name: name });
     })
     .then((new_key) => {
       console.log(new_key);
@@ -97,7 +91,7 @@ router.post('/keys', (req, res) => {
     })
     .catch(ResultHandler(res));
 /*
-  models.Key
+  Key
     .findOrCreate({ where: { name: name } })
     .then(([key, created]) => {
       if (!created)
@@ -132,13 +126,11 @@ router.put('/keys/:id', (req, res) => {
     return;
   }
 
-  models.Key
-    .findOne({ where: { id: id } })
+  Key.findOne({ where: { id: id } })
     .then((key) => {
       if (key == null) {
         // insert given key
-        return models.Key
-          .create({ id: id, name: name })
+        return Key.create({ id: id, name: name })
           .then((new_key) => {
             console.log(new_key);
             throw new ResultWrapper(200, { key: new_key });
@@ -146,8 +138,7 @@ router.put('/keys/:id', (req, res) => {
       }
       
       // update found key
-      return models.Key
-        .update(
+      return Key.update(
           { name: name }, 
           { where: { id: id } }
         );
@@ -170,7 +161,7 @@ router.put('/keys/:id', (req, res) => {
   /* In SQLite3, upsert uses two queries (insert => update) & update is always executed
    * Sequelize determines "existence" of item using primary key OR unique key automatically,
    * which means both id and name can be used. Therefore using upsert is not good in this case. */
-  // models.Key
+  // Key
   //   .upsert({ id: id, name: name }, { where: { id: id } })
   //   .then(() => {
   //     // Sequelize Reference:
