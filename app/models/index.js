@@ -27,6 +27,10 @@ sequelize
 
 // 1. Key
 var Key = sequelize.define('key', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true
+  },
   name: {
     type: Sequelize.TEXT,
     allowNull: false,
@@ -40,6 +44,12 @@ var Key = sequelize.define('key', {
     }
   }
 });
+
+// Specify default order for key id allocator. 
+// https://github.com/sequelize/sequelize/issues/9289
+Key.addScope('defaultScope', {
+  order: [['id', 'ASC']],
+}, { override: true });
 
 // 2. Translation
 var Translation = sequelize.define('translation', {
