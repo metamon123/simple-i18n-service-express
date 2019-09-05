@@ -2,6 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   var Key = sequelize.define('key', {
     id: {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },
     name: {
@@ -17,12 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   });
-  
-  // Specify default order for key id allocator. 
-  // https://github.com/sequelize/sequelize/issues/9289
-  Key.addScope('defaultScope', {
-    order: [['id', 'ASC']],
-  }, { override: true });
 
   return Key;
 }
