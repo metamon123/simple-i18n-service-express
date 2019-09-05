@@ -20,5 +20,6 @@ Prerequisite
 
 ```sh
 chmod +x build.sh run.sh
-./build.sh; run.sh;
+./build.sh;
+./run.sh;
 ```
